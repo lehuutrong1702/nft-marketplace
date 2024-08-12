@@ -1,11 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
 
-import { Fragment } from 'react'
+
 import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { BellIcon, MenuIcon, XIcon } from '@heroicons/react/outline'
 import Link from 'next/link'
 import ActiveLink from '../link'
-import { useAccount } from '@hooks'
+import { useAccount } from '@hooks/web3'
+import Walletbar from './WalletBar'
 
 const navigation = [
   { name: 'MarketPlace', href: '/', current: true },
@@ -18,13 +19,15 @@ function classNames(...classes: string[]) {
 }
 
 export default function Navbar() {
-  const { data } = useAccount("Some Random Params");
+  const { account } = useAccount();
 
-  console.log(data);
+  console.log(account.data);
+ 
   return (
     <Disclosure as="nav" className="bg-gray-800">
       {({ open }) => (
         <>
+        {account.data}
           <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
             <div className="relative flex items-center justify-between h-16">
               <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
@@ -76,36 +79,16 @@ export default function Navbar() {
                 </button>
 
                 {/* Profile dropdown */}
-                <Menu as="div" className="ml-3 relative z-10">
-                  <div>
-                    <Menu.Button className="bg-gray-800 flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
-                      <span className="sr-only">Open user menu</span>
-                      <img
-                        className="h-8 w-8 rounded-full"
-                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                        alt=""
-                      />
-                    </Menu.Button>
-                  </div>
-                 
-                    <Menu.Items className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
-                      <Menu.Item>
-                        {({ active }) => (
-                          <Link href="/profile" >
-                           <a
-                            
-                            className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
-                          >
-                            Your Profile
-                          </a>
-                          </Link>
-                         
-                        )}
-                      </Menu.Item>
-            
-                    </Menu.Items>
-        
-                </Menu>
+
+                { 
+                  <Walletbar 
+                    isInstalled= {account.isInstalled}
+                    isLoading = {account.isLoading}
+                    connect = {account.connect}
+                    account = {account.data}
+                  />
+                }
+             
               </div>
             </div>
           </div>
