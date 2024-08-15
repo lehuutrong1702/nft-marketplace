@@ -6,13 +6,13 @@ import useSWR from "swr";
 
 type UseAccountResponse= {
     connect: () => void;
-    isLoading : boolean;
+    isLoading : boolean | undefined;
     isInstalled: boolean
 }
 
 
 type AccountHookFactory = CryptoHookFactory<string,UseAccountResponse>
-export type useAccountHook = ReturnType<AccountHookFactory>
+export type UseAccountHook = ReturnType<AccountHookFactory>
 
 export const hookFactory: AccountHookFactory = ({provider,ethereum,isLoading}) => () =>{
     const {data,mutate, isValidating ,...swr} = useSWR(provider ? "web3/useAccount" : null,
@@ -25,7 +25,8 @@ export const hookFactory: AccountHookFactory = ({provider,ethereum,isLoading}) =
             return account;
 
         }, {
-            revalidateOnFocus: false 
+          revalidateOnFocus: false,
+          shouldRetryOnError: false
         })
 
     
@@ -57,7 +58,7 @@ export const hookFactory: AccountHookFactory = ({provider,ethereum,isLoading}) =
     data,
     mutate,
     connect,
-    isLoading : isLoading || isValidating,
+    isLoading : isLoading as boolean,
     isInstalled: ethereum?.isMetaMask || false,
     isValidating
     };
