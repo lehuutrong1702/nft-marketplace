@@ -15,7 +15,10 @@ const handleAccount = (ethereum: MetaMaskInpageProvider) => async () =>  {
   const isLocked = !(await ethereum._metamask.isUnlocked());
   if(isLocked) {pageReload() };
 }
+
 const Web3Context = createContext<Web3State>(createDefaultState());
+
+
 const setGlobalListeners = (ethereum: MetaMaskInpageProvider) => {
   ethereum.on("chainChanged", pageReload);
   ethereum.on("accountsChanged",handleAccount(ethereum))

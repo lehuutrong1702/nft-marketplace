@@ -9,14 +9,16 @@ import { NftMeta, PinataRes } from '@_types/nft';
 import { ChangeEvent } from 'react';
 import axios from 'axios';
 import { useWeb3 } from '@provider/web3';
+import { ethers } from 'ethers';
 
+import { ToastContainer, toast } from 'react-toastify';
 
 const ATTRIBUTES = ["health", "attack", "speed"]
 const domain = "https://chocolate-near-bedbug-866.mypinata.cloud"
 const ALLOWED_FIELDS = ["name", "description", "image", "attributes"];
 const NftCreate: NextPage = () => {
 
-  const { ethereum } = useWeb3();
+  const { ethereum, contract } = useWeb3();
   const [nftURI, setNftURI] = useState("");
   const [price, setPrice] = useState("");
   const [hasURI, setHasURI] = useState(false);
@@ -72,7 +74,7 @@ const NftCreate: NextPage = () => {
     const bytes = new Uint8Array(buffer);
     try {
       const { signedData, account } = await getSignedData();
-      const res = await axios.post("/api/verify-image", {
+      const promise = axios.post("/api/verify-image", {
         address: account,
         signature: signedData,
         bytes,
@@ -81,6 +83,11 @@ const NftCreate: NextPage = () => {
 
       });
 
+      const res = await toast.promise(promise, {
+        pending: "Uploading image",
+        error: "Image upload error",
+        success: "Image uploaded"
+      })
 
       const data = res.data as PinataRes;
       console.log(data);
@@ -113,7 +120,20 @@ const NftCreate: NextPage = () => {
         }
       })
 
-      alert("Can create NFT");
+      const tx = await contract?.mintToken(
+        nftURI,
+        ethers.utils.parseEther(price),
+        {
+          value: ethers.utils.parseEther(0.025.toString())
+        }
+      )
+
+      await toast.promise(tx!.wait(), {
+        pending: "Uploading image",
+        error: "Image upload error",
+        success: "Image uploaded"
+      })
+
     } catch (e: any) {
       console.error(e.message);
     }
@@ -122,10 +142,19 @@ const NftCreate: NextPage = () => {
     try {
       const { signedData, account } = await getSignedData();
 
-      const res = await axios.post("/api/verify", {
+      const promise = axios.post("/api/verify", {
         address: account,
         signature: signedData,
         nft: nftMeta
+      })
+
+
+
+
+      const res = await toast.promise(promise, {
+        pending: "Uploading image",
+        error: "Image upload error",
+        success: "Image uploaded"
       })
 
       const data = res.data as PinataRes
